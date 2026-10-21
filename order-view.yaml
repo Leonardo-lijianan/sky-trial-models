@@ -66,6 +66,12 @@ api:
     auth: { roles: [admin] }
     input: OrderConfirmForm
 
+  orderSync:
+    method: POST
+    path: /admin/order/sync
+    summary: 同步订单
+    auth: authenticated
+
   orderCancel:
     method: PUT
     path: /admin/order/cancel/:id
