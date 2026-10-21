@@ -1,0 +1,84 @@
+# Dish 管理端视图与接口
+# 本轮重点验证：
+#   - type: array, of: ... 嵌套数组表单（菜品 + 口味一起提交）
+#   - derived: join 出参带关联对象（列表带分类）
+#   - 一域多接口时 Controller 仍按 domain 聚合（已知问题）
+
+kind: domain
+domain: sky
+
+views:
+  DishFlavorForm:
+    kind: form
+    fields:
+      name: { type: string, length: 32 }
+      value: { type: string, length: 255 }
+    required: [name, value]
+
+  DishBrief:
+    kind: brief
+    fields:
+      id: { type: string, from: Dish.id }
+      name: { type: string, from: Dish.name }
+      price: { type: decimal, from: Dish.price }
+      image: { type: string, from: Dish.image }
+      status: { type: int, from: Dish.status }
+      category: { type: CategoryBrief, derived: join }
+
+  DishForm:
+    kind: form
+    fields:
+      name: { type: string, length: 32 }
+      categoryId: { type: string }
+      price: { type: decimal }
+      image: { type: string, length: 255 }
+      description: { type: string, length: 255 }
+      status: { type: int, default: 1 }
+      flavors: { type: array, of: DishFlavorForm }
+    required: [name, categoryId, price]
+
+api:
+  dishPage:
+    method: GET
+    path: /admin/dish/page
+    summary: 菜品分页查询
+    auth: authenticated
+    query:
+      name: { type: string, nullable: true }
+      categoryId: { type: string, nullable: true }
+      status: { type: int, nullable: true }
+      page: { type: int, nullable: true }
+      pageSize: { type: int, nullable: true }
+    output: DishBrief
+
+  dishSave:
+    method: POST
+    path: /admin/dish
+    summary: 新增菜品
+    auth: authenticated
+    input: DishForm
+
+  dishUpdate:
+    method: PUT
+    path: /admin/dish
+    summary: 修改菜品
+    auth: authenticated
+    input: DishForm
+
+  dishDelete:
+    method: DELETE
+    path: /admin/dish/:id
+    summary: 删除菜品
+    auth: authenticated
+    pathParams:
+      id: { type: id, idType: long }
+
+  dishStatus:
+    method: POST
+    path: /admin/dish/status/:status
+    summary: 起售停售
+    auth: authenticated
+    pathParams:
+      status: { type: int }
+    query:
+      id: { type: string }

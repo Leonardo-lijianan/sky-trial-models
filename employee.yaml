@@ -1,0 +1,24 @@
+# v3：sensitive/writeOnly 实测不能用在 entity 上（isolate 确认）
+# - writeOnly：报 C31「不能用在 entity」，只能用于 view
+# - sensitive：entity 上报「类型错误/取值非法」，文档未说明作用域
+# 故 entity 层 password 只用 note；脱敏逻辑留给 view 层（writeOnly）或手写 VO
+
+kind: domain
+domain: sky
+
+entities:
+  Employee:
+    table: employee
+    fields:
+      id: { type: id, idType: long }
+      username: { type: string, length: 32, unique: true, note: 用户名 }
+      name: { type: string, length: 32, note: 姓名 }
+      password: { type: string, length: 64, note: 密码 }
+      phone: { type: string, length: 11, note: 手机号 }
+      sex: { type: string, length: 2, note: 性别 }
+      idNumber: { type: string, length: 18, note: 身份证号 }
+      status: { type: int, default: 1, note: 1正常 0锁定 }
+      createTime: { type: datetime, auto: create }
+      updateTime: { type: datetime, auto: update }
+      createUser: { type: long, nullable: true, note: 创建人 }
+      updateUser: { type: long, nullable: true, note: 修改人 }

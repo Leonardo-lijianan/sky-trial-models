@@ -1,0 +1,70 @@
+# 订单详情页：测最后三种未验证能力
+#   1. derived: text（枚举 → 显示文本）
+#   2. sensitive（出参打码，只能用于 brief/detail）
+#   3. validate（引用预置校验器，需 rules 段或 global/rules.yaml）
+
+kind: domain
+domain: order
+
+views:
+  OrderDetail:
+    kind: detail
+    fields:
+      id: { type: string, from: Orders.id }
+      number: { type: string, from: Orders.number }
+      status: { type: OrderStatus, from: Orders.status }
+      statusText: { type: string, derived: text }
+      payStatus: { type: PayStatus, from: Orders.payStatus }
+      amount: { type: decimal, from: Orders.amount }
+      phone: { type: string, from: Orders.phone }   # sensitive 实测 schema 层不支持，见 feedback
+      address: { type: string, from: Orders.address }
+      consignee: { type: string, from: Orders.consignee }
+      remark: { type: string, from: Orders.remark }
+      orderTime: { type: datetime, from: Orders.orderTime }
+      checkoutTime: { type: datetime, from: Orders.checkoutTime }
+
+  OrderQuery:
+    kind: query
+    fields:
+      number: { type: string, nullable: true }
+      phone: { type: string, nullable: true }
+      status: { type: OrderStatus, nullable: true }
+
+api:
+  orderPage:
+    method: GET
+    path: /admin/order/page
+    summary: 订单条件查询
+    auth: authenticated
+    query:
+      number: { type: string, nullable: true }
+      phone: { type: string, nullable: true }
+      page: { type: int, nullable: true }
+      pageSize: { type: int, nullable: true }
+    output: OrderDetail
+
+  orderDetail:
+    method: GET
+    path: /admin/order/detail/:id
+    summary: 订单详情
+    auth: authenticated
+    pathParams:
+      id: { type: id, idType: long }
+    output: OrderDetail
+
+  orderConfirm:
+    method: PUT
+    path: /admin/order/confirm
+    summary: 接单
+    auth: { roles: [admin] }
+    input: OrderDetail
+
+  orderCancel:
+    method: PUT
+    path: /admin/order/cancel/:id
+    summary: 取消订单
+    auth: authenticated
+    pathParams:
+      id: { type: id, idType: long }
+    query:
+      cancelReason: { type: string }

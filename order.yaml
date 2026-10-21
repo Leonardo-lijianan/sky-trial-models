@@ -1,0 +1,53 @@
+# 订单域：状态机验证（苍穹外卖核心）
+# 本轮重点：
+#   1. 枚举 + state 状态机语法（docs/part2-model-spec/2-enums.md）
+#   2. transitions.by 引用 UserRole 枚举（C10 校验）
+#   3. 枚举字段在三端（DB varchar / Java enum / TS union）的生成
+
+kind: domain
+domain: order
+
+enums:
+  OrderStatus:
+    values: [pendingPayment, pendingAccept, accepted, delivering, completed, cancelled]
+    labels:
+      pendingPayment: 待付款
+      pendingAccept: 待接单
+      accepted: 已接单
+      delivering: 派送中
+      completed: 已完成
+      cancelled: 已取消
+    state:
+      initial: pendingPayment
+      transitions:
+        - { from: pendingPayment, to: [pendingAccept, cancelled], action: pay, by: [user] }
+        - { from: pendingAccept, to: [accepted, cancelled], action: accept, by: [admin] }
+        - { from: accepted, to: [delivering], action: deliver, by: [admin] }
+        - { from: delivering, to: [completed], action: complete, by: [admin] }
+        - { from: [pendingPayment, pendingAccept], to: [cancelled], action: cancel, by: [admin, user] }
+
+  PayStatus:
+    values: [unpaid, paid, refunded]
+    labels:
+      unpaid: 未支付
+      paid: 已支付
+      refunded: 已退款
+
+entities:
+  Orders:
+    table: orders
+    fields:
+      id: { type: id, idType: long }
+      number: { type: string, length: 32, unique: true, note: 订单号 }
+      status: { type: OrderStatus, default: pendingPayment, note: 订单状态 }
+      payStatus: { type: PayStatus, default: unpaid, note: 支付状态 }
+      amount: { type: decimal, note: 实收金额 }
+      remark: { type: string, length: 100, nullable: true, note: 备注 }
+      phone: { type: string, length: 11, note: 手机号 }
+      address: { type: string, length: 255, note: 地址 }
+      consignee: { type: string, length: 32, note: 收货人 }
+      cancelReason: { type: string, length: 100, nullable: true, note: 取消原因 }
+      orderTime: { type: datetime, note: 下单时间 }
+      checkoutTime: { type: datetime, nullable: true, note: 结账时间 }
+      createTime: { type: datetime, auto: create }
+      updateTime: { type: datetime, auto: update }

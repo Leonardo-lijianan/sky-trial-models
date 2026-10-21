@@ -1,0 +1,24 @@
+# v2：按 polyforge 官方模型规范重写
+# 依据：docs/part2-model-spec/1-file-organization.md、3-entities.md、7-field-syntax.md
+# 关键修正：
+#   1. 顶层 kind: domain 之外，还需 domain: <域名>
+#   2. 主键用 type: id + idType: long，没有 primaryKey/autoIncrement
+#   3. 注释用 note，不是 comment
+#   4. 字段用紧凑写法 { type: ..., 修饰符 }
+
+kind: domain
+domain: sky
+
+entities:
+  Category:
+    table: category
+    fields:
+      id: { type: id, idType: long }
+      name: { type: string, length: 32, unique: true, note: 分类名称 }
+      type: { type: int, note: 1菜品分类 2套餐分类 }
+      sort: { type: int, default: 0, note: 排序 }
+      status: { type: int, default: 1, note: 1启用 0禁用 }
+      createTime: { type: datetime, auto: create }
+      updateTime: { type: datetime, auto: update }
+      createUser: { type: long, nullable: true, note: 创建人 }
+      updateUser: { type: long, nullable: true, note: 修改人 }

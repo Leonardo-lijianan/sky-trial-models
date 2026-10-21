@@ -1,0 +1,8 @@
+# 全局枚举（kind: global），跨域共享
+# 用途：定义 UserRole 等被 api.auth.roles 引用的角色枚举
+
+kind: global
+
+enums:
+  UserRole:
+    values: [admin, user]

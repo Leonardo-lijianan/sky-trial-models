@@ -1,0 +1,29 @@
+# Dish + DishFlavor（原版 dish / dish_flavor 两表）
+# 本轮验证：一域多实体、ref 外键在子表上的表现
+
+kind: domain
+domain: sky
+
+entities:
+  Dish:
+    table: dish
+    fields:
+      id: { type: id, idType: long }
+      name: { type: string, length: 32, unique: true, note: 菜品名称 }
+      categoryId: { ref: Category, note: 分类id }
+      price: { type: decimal, note: 菜品价格 }
+      image: { type: string, length: 255, nullable: true, note: 图片 }
+      description: { type: string, length: 255, nullable: true, note: 描述信息 }
+      status: { type: int, default: 1, note: 1起售 0停售 }
+      createTime: { type: datetime, auto: create }
+      updateTime: { type: datetime, auto: update }
+      createUser: { type: long, nullable: true, note: 创建人 }
+      updateUser: { type: long, nullable: true, note: 修改人 }
+
+  DishFlavor:
+    table: dish_flavor
+    fields:
+      id: { type: id, idType: long }
+      dishId: { ref: Dish, note: 菜品id }
+      name: { type: string, length: 32, note: 口味名称 }
+      value: { type: string, length: 255, note: 口味值 }

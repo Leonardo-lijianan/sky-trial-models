@@ -1,0 +1,38 @@
+# 权限矩阵（kind: permissions）
+# 注意：permissions 只做校验（C25），不生成任何代码。
+# 后端 @PreAuthorize 直接读 api.auth.roles，前端路由守卫 meta.roles 需手写。
+# 本文件的作用是：让 api 里 auth.roles 引用的角色有定义可查。
+
+kind: permissions
+
+resources:
+  - name: Category
+    operations: [Read, Create, Update, Delete]
+  - name: Dish
+    operations: [Read, Create, Update, Delete]
+  - name: Employee
+    operations: [Read, Create, Update, Delete]
+  - name: Order
+    operations: [Read, Create, Update, Cancel]
+
+dataScopes:
+  - self
+  - all
+
+roles:
+  - name: admin
+    label: 管理员
+    defaultDataScope: all
+    permissions:
+      - 'Category:*'
+      - 'Dish:*'
+      - 'Employee:*'
+      - 'Order:*'
+
+  - name: user
+    label: 用户
+    defaultDataScope: self
+    permissions:
+      - 'Order:Create'
+      - 'Order:Read'
+      - 'Order:Cancel'

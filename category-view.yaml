@@ -1,0 +1,57 @@
+# Category 管理端接口（按官方 4-views.md / 5-apis.md / 10-modifier-scope.md 重写）
+# 关键修正：
+#   - view kind 只有 form / query / brief / detail
+#   - view 无 entity 字段，只声明 kind + fields
+#   - from 写 Category.id（带实体前缀），且只能用于 brief/detail
+#   - 顶层键是 api（单数），不是 apis
+#   - 路径参数 :id 必须在 pathParams 声明类型（否则 C28）
+
+kind: domain
+domain: sky
+
+views:
+  CategoryBrief:
+    kind: brief
+    fields:
+      id: { type: string, from: Category.id }
+      name: { type: string, from: Category.name }
+      type: { type: int, from: Category.type }
+      sort: { type: int, from: Category.sort }
+      status: { type: int, from: Category.status }
+
+  CategoryForm:
+    kind: form
+    fields:
+      name: { type: string, length: 32 }
+      type: { type: int }
+      sort: { type: int, default: 0 }
+      status: { type: int, default: 1 }
+    required: [name, type]
+
+api:
+  categoryPage:
+    method: GET
+    path: /admin/category/page
+    summary: 分类分页查询
+    auth: authenticated
+    query:
+      name: { type: string, nullable: true }
+      type: { type: int, nullable: true }
+      page: { type: int, nullable: true }
+      pageSize: { type: int, nullable: true }
+    output: CategoryBrief
+
+  categorySave:
+    method: POST
+    path: /admin/category
+    summary: 新增分类
+    auth: authenticated
+    input: CategoryForm
+
+  categoryDelete:
+    method: DELETE
+    path: /admin/category/:id
+    summary: 删除分类
+    auth: authenticated
+    pathParams:
+      id: { type: id, idType: long }
