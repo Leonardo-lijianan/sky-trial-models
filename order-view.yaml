@@ -16,7 +16,7 @@ views:
       statusText: { type: string, derived: text }
       payStatus: { type: PayStatus, from: Orders.payStatus }
       amount: { type: decimal, from: Orders.amount }
-      phone: { type: string, from: Orders.phone }   # sensitive 实测 schema 层不支持，见 feedback
+      phone: { type: string, from: Orders.phone }
       address: { type: string, from: Orders.address }
       consignee: { type: string, from: Orders.consignee }
       remark: { type: string, from: Orders.remark }
@@ -29,6 +29,13 @@ views:
       number: { type: string, nullable: true }
       phone: { type: string, nullable: true }
       status: { type: OrderStatus, nullable: true }
+
+  OrderConfirmForm:
+    kind: form
+    fields:
+      id: { type: string }
+      remark: { type: string, length: 100, nullable: true }
+    required: [id]
 
 api:
   orderPage:
@@ -57,7 +64,7 @@ api:
     path: /admin/order/confirm
     summary: 接单
     auth: { roles: [admin] }
-    input: OrderDetail
+    input: OrderConfirmForm
 
   orderCancel:
     method: PUT
